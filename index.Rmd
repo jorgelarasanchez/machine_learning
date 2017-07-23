@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Background
 
-Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <http://groupware.les.inf.puc-rio.br/har> (see the section on the Weight Lifting Exercise Dataset).
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <http://groupware.les.inf.puc-rio.br/har> (see the section on the Weight Lifting Exercise Dataset).
 
 ## Data
 
@@ -57,7 +57,7 @@ if (file.exists(trainURL) == FALSE) {
 if (file.exists(testURL) == FALSE) {
   download.file(testURL,destfile=data_test)
 }
-# Read the training data into R, identifying "NA", "" and "#DIV/0!" as NA strings
+# Read the training data into R, identifying “NA”, “” and “#DIV/0!” as NA strings
 
 train_d <- read.csv("pml-training.csv",na.strings=c("NA","","#DIV/0!"))
 test_d <- read.csv("pml-testing.csv",na.strings=c("NA","","#DIV/0!"))
@@ -129,7 +129,7 @@ confusionMatrix(pred_rf, testing$classe)
 
 El metodo mejor es RAndom Forest que nos da un accuaricy mayor con . Usaremos el modelo RAndom Forest para hacer la prediccion.
 
-## Predicci�n utilizando el modelo
+## Predicción utilizando el modelo
 
 ```{r prediction}
 prediction <- predict(mod_rf,test_d)
