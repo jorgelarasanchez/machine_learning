@@ -9,22 +9,125 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Background
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <http://groupware.les.inf.puc-rio.br/har> (see the section on the Weight Lifting Exercise Dataset).
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Data
 
-```{r cars}
-summary(cars)
+The training data for this project are available here:
+
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv>
+
+The test data are available here:
+
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
+
+
+The data for this project come from this source: <http://groupware.les.inf.puc-rio.br/har>. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
+
+# Loading and preprocessing the data
+
+* Load the data
+
+```{r load}
+
+library(caret)
+library(randomForest)
+library(gbm)
+library(AppliedPredictiveModeling)
+library(rpart)
+
+set.seed(666)
+
+trainURL <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv'
+
+data_train <- "./pml-training.csv"
+
+testURL <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv'
+
+data_test <- "./pml-testing.csv"
+
+# Download the file
+if (file.exists(trainURL) == FALSE) {
+  download.file(trainURL,destfile=data_train)
+}
+
+if (file.exists(testURL) == FALSE) {
+  download.file(testURL,destfile=data_test)
+}
+# Read the training data into R, identifying "NA", "" and "#DIV/0!" as NA strings
+
+train_d <- read.csv("pml-training.csv",na.strings=c("NA","","#DIV/0!"))
+test_d <- read.csv("pml-testing.csv",na.strings=c("NA","","#DIV/0!"))
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r str,results='hide'} 
+str(train_d)
+str(test_d)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Tenemos para el data frame train 19622 observaciones de 160 variables y pra el data frame test tenemos 20 observaciones de 160 variables 
+Visto el numero de NA que tenemos, eliminamos las variables que tengan todo con NA
+
+```{r sinNA} 
+sinNAtra <- sapply(train_d, function(x)all(!is.na(x)))
+sinNAtes <- sapply(test_d, function(x)all(!is.na(x)))
+train_d <- train_d[,sinNAtra]
+test_d <- test_d[,sinNAtes]
+
+str(train_d)
+str(test_d)
+
+# Delete variables are irrelevant to our current project: user_name, raw_timestamp_part_1, raw_timestamp_part_,2 cvtd_timestamp, new_window, and  num_window (columns 1 to 7). 
+train_d <-train_d[,-c(1:7)]
+test_d  <-test_d[,-c(1:7)]
+
+```
+
+```{r strnew,results='hide'} 
+str(train_d)
+str(test_d)
+```
+
+EDspues de eliminar variables con Na y sin valor para el analisis nos quedamos con 19622 observacioenes de 53 variables para el data frame train y 20 observaciones de 53 variables para el data frame test.
+
+
+
+## Model Building
+
+Para el royecto utilizaremos tres modelos (decision trees with CART, stochastic gradient boosting tress and random forest decision trees) para ver quient tiene el mejor accuarity. Sobre el mejor aplicaremos cross validation.
+
+partition the train data so that 70% of the training dataset into training and the remaining 30% to testing
+
+```{r partition}
+trainset <- createDataPartition(y=train_d$classe, p=0.7, list=FALSE)
+training <- train_d[trainset, ] 
+testing <- train_d[-trainset, ]
+```
+
+Evaluamos los modelos
+
+```{r model}
+mod_rf <- train(classe ~ ., data = training, method = "rf")
+mod_gbm <- train(classe ~ ., data = training, method = "gbm")
+mod_rpart <- train(classe ~ ., data = training, method = "rpart")
+pred_rf <- predict(mod_rf, testing)
+pred_gbm <- predict(mod_gbm, testing)
+pred_rpart <- predict(mod_rpart, testing)
+confusionMatrix(pred_rf, testing$classe)$overall[1]
+confusionMatrix(pred_gbm, testing$classe)$overall[1]
+confusionMatrix(pred_rpart, testing$classe)$overall[1]
+```
+
+
+El metodo mejor es RAndom Forest que nos da un accuaricy mayor con . Usaremos el modelo RAndom Forest para hacer la prediccion.
+
+## Predicción utilizando el modelo
+
+```{r model}
+prediction <- predict(mod_rf,test_d,type=class)
+print(prediction)
+```
