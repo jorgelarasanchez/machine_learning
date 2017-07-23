@@ -341,8 +341,8 @@ testing &lt;- train_d[-trainset, ]</code></pre>
 <p>We evaluate the models.</p>
 <pre class="r"><code>controls &lt;- trainControl(method=&quot;cv&quot;, number = 6)
 mod_rf &lt;- train(classe ~ ., data = training, method = &quot;rf&quot;,trControl=controls)
-mod_gbm &lt;- train(classe ~ ., data = training, method = &quot;gbm&quot;,trControl=controls)</code></pre>
-<pre class="r"><code>mod_rpart &lt;- train(classe ~ ., data = training, method = &quot;rpart&quot;,trControl=controls)
+mod_gbm &lt;- train(classe ~ ., data = training, method = &quot;gbm&quot;,trControl=controls)
+mod_rpart &lt;- train(classe ~ ., data = training, method = &quot;rpart&quot;,trControl=controls)
 pred_rf &lt;- predict(mod_rf, testing)
 pred_gbm &lt;- predict(mod_gbm, testing)
 pred_rpart &lt;- predict(mod_rpart, testing)
