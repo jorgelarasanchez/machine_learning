@@ -37,6 +37,7 @@ library(randomForest)
 library(gbm)
 library(AppliedPredictiveModeling)
 library(rpart)
+library(plyr)
 
 set.seed(666)
 
@@ -111,15 +112,18 @@ testing <- train_d[-trainset, ]
 Evaluamos los modelos
 
 ```{r model}
-mod_rf <- train(classe ~ ., data = training, method = "rf")
-mod_gbm <- train(classe ~ ., data = training, method = "gbm")
-mod_rpart <- train(classe ~ ., data = training, method = "rpart")
+controls <- trainControl(method="cv", number = 6)
+mod_rf <- train(classe ~ ., data = training, method = "rf",trControl=controls,verbose=F)
+mod_gbm <- train(classe ~ ., data = training, method = "gbm",trControl=controls,verbose=F)
+mod_rpart <- train(classe ~ ., data = training, method = "rpart",trControl=controls,verbose=F)
 pred_rf <- predict(mod_rf, testing)
 pred_gbm <- predict(mod_gbm, testing)
 pred_rpart <- predict(mod_rpart, testing)
 confusionMatrix(pred_rf, testing$classe)$overall[1]
 confusionMatrix(pred_gbm, testing$classe)$overall[1]
 confusionMatrix(pred_rpart, testing$classe)$overall[1]
+
+confusionMatrix(pred_rf, testing$classe)
 ```
 
 
@@ -127,7 +131,7 @@ El metodo mejor es RAndom Forest que nos da un accuaricy mayor con . Usaremos el
 
 ## Predicción utilizando el modelo
 
-```{r model}
-prediction <- predict(mod_rf,test_d,type=class)
+```{r prediction}
+prediction <- predict(mod_rf,test_d)
 print(prediction)
 ```
