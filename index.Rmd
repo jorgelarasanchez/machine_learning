@@ -70,8 +70,8 @@ str(train_d)
 str(test_d)
 ```
 
-Tenemos para el data frame train 19622 observaciones de 160 variables y pra el data frame test tenemos 20 observaciones de 160 variables 
-Visto el numero de NA que tenemos, eliminamos las variables que tengan todo con NA
+We have for the data frame train 19622 observations of 160 variables and for the data frame test we have 20 observations of 160 variables
+Given the number of NA we have, we eliminate the variables that have everything with NA.
 
 ```{r sinNA} 
 sinNAtra <- sapply(train_d, function(x)all(!is.na(x)))
@@ -93,15 +93,16 @@ str(train_d)
 str(test_d)
 ```
 
-EDspues de eliminar variables con Na y sin valor para el analisis nos quedamos con 19622 observacioenes de 53 variables para el data frame train y 20 observaciones de 53 variables para el data frame test.
+We have for the data frame train 19622 observations of 160 variables and pra the data frame test we have 20 observations of 160 variables Given the number of NA we have, we eliminate the variables that have everything with NA.
 
 
 
 ## Model Building
 
-Para el royecto utilizaremos tres modelos (decision trees with CART, stochastic gradient boosting tress and random forest decision trees) para ver quient tiene el mejor accuarity. Sobre el mejor aplicaremos cross validation.
+For the project we will use three models (decision trees with CART, stochastic gradient boosting tress and random forest decision trees) to see quient has the best accuarity. On the best we show details cross validation.
 
-partition the train data so that 70% of the training dataset into training and the remaining 30% to testing
+
+Partition the train data so that 70% of the training dataset into training and the remaining 30% to testing.
 
 ```{r partition}
 trainset <- createDataPartition(y=train_d$classe, p=0.7, list=FALSE)
@@ -109,13 +110,14 @@ training <- train_d[trainset, ]
 testing <- train_d[-trainset, ]
 ```
 
-Evaluamos los modelos
+We evaluate the models.
 
 ```{r model}
-controls <- trainControl(method="cv", number = 6)
-mod_rf <- train(classe ~ ., data = training, method = "rf",trControl=controls,verbose=F)
-mod_gbm <- train(classe ~ ., data = training, method = "gbm",trControl=controls,verbose=F)
-mod_rpart <- train(classe ~ ., data = training, method = "rpart",trControl=controls,verbose=F)
+
+controls <- trainControl(method = "cv", number = 6)
+mod_rf <- train(classe ~ ., data = training, method = "rf",trControl=controls)
+mod_gbm <- train(classe ~ ., data = training, method = "gbm",trControl=controls)
+mod_rpart <- train(classe ~ ., data = training, method = "rpart",trControl=controls)
 pred_rf <- predict(mod_rf, testing)
 pred_gbm <- predict(mod_gbm, testing)
 pred_rpart <- predict(mod_rpart, testing)
@@ -123,13 +125,19 @@ confusionMatrix(pred_rf, testing$classe)$overall[1]
 confusionMatrix(pred_gbm, testing$classe)$overall[1]
 confusionMatrix(pred_rpart, testing$classe)$overall[1]
 
+```
+
+The best model is Random Forest which gives us a higher Accuracy with 0.9924. We will use the Random Forest model to make the prediction.
+
+```{r cross}
 confusionMatrix(pred_rf, testing$classe)
 ```
 
+Accuracy for Random Forest model was 0.9924 (95% CI: (0.9898, 0.9944)). The expected out-of-sample error is estimated at 0.0076, or 0.76%.
 
-El metodo mejor es RAndom Forest que nos da un accuaricy mayor con . Usaremos el modelo RAndom Forest para hacer la prediccion.
+## Prediction using the model
 
-## Predicción utilizando el modelo
+Here is the final outcome based Random Forest applied against the Testing dataset.
 
 ```{r prediction}
 prediction <- predict(mod_rf,test_d)
